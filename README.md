@@ -1,7 +1,7 @@
 Comparing the performance of **static**, **incremental**, and **dynamic**
-PageRank; with loop-based dead end handling strategy ([pull], [CSR]).
+PageRank ([pull], [CSR]).
 
-`TODO after report!`
+`TODO!`
 
 This experiment was for comparing the performance between the three modes of
 PageRank computation: **static**, **incremental**, and **dynamic**. Loop-based

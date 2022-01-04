@@ -24,21 +24,19 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
   enum NormFunction { L0=0, L1=1, L2=2, Li=3 };
   vector<T> *init = nullptr;
 
-  DiGraph<> xo;
+  DiGraph<> x;
   stringstream s(data);
   while (true) {
     // Skip some edges (to speed up execution)
-    if (skip>0 && !readSnapTemporal(xo, s, skip)) break;
-    auto x  = selfLoop(xo, [&](int u) { return isDeadEnd(xo, u); });
+    if (skip>0 && !readSnapTemporal(x, s, skip)) break;
     auto xt = transposeWithDegree(x);
     auto ksOld = vertices(x);
     auto a0 = pagerankMonolithicSeq(x, xt, init, {repeat});
     auto Rx = a0.ranks;
 
     // Read edges for this batch.
-    auto yo = copy(xo);
-    if (!readSnapTemporal(yo, s, batch)) break;
-    auto y  = selfLoop(yo, [&](int u) { return isDeadEnd(yo, u); });
+    auto y = copy(x);
+    if (!readSnapTemporal(y, s, batch)) break;
     auto yt = transposeWithDegree(y);
     auto ks = vertices(y);
     vector<T> ry(y.span());
@@ -104,7 +102,7 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
     printRow(x, b1, j1, "D:pagerankMonolithicSeqLiNorm (dynamic)");
 
     // New graph is now old.
-    xo = move(yo);
+    x = move(y);
   }
 }
 
@@ -126,6 +124,6 @@ int main(int argc, char **argv) {
   printf("Using graph %s ...\n", file);
   string d = readFile(file);
   runPagerank(d, repeat);
-    printf("\n");
+  printf("\n");
   return 0;
 }
