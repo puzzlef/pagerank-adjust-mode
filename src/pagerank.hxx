@@ -3,6 +3,7 @@
 #include <utility>
 
 using std::vector;
+using std::pair;
 using std::move;
 
 
@@ -32,14 +33,15 @@ struct PagerankOptions {
 template <class T>
 struct PagerankResult {
   vector<T> ranks;
-  int   iterations;
+  float iterations;
   float time;
+  float load;
 
-  PagerankResult(vector<T>&& ranks, int iterations=0, float time=0) :
-  ranks(ranks), iterations(iterations), time(time) {}
+  PagerankResult(vector<T>&& ranks, float iterations=0, float time=0, float load=1) :
+  ranks(ranks), iterations(iterations), time(time), load(load) {}
 
-  PagerankResult(vector<T>& ranks, int iterations=0, float time=0) :
-  ranks(move(ranks)), iterations(iterations), time(time) {}
+  PagerankResult(vector<T>& ranks, float iterations=0, float time=0, float load=1) :
+  ranks(move(ranks)), iterations(iterations), time(time), load(load) {}
 
 
   // Get initial ranks (when no vertices affected for dynamic pagerank).
@@ -51,3 +53,37 @@ struct PagerankResult {
     return {a, 0, 0};
   }
 };
+
+
+
+
+// PAGERANK-DATA
+// -------------
+// Using Pagerank Data for performance!
+
+struct PagerankData {
+  pair<vector<int>, int> dynamicInVertices;
+  vector<int> sourceOffsets;
+  vector<int> destinationIndices;
+  vector<int> vertexData;
+};
+
+template <class G, class H>
+auto dynamicInVerticesD(const G& x, const H& xt, const G& y, const H& yt, const PagerankData *D) {
+  return D? D->dynamicInVertices : dynamicInVertices(x, xt, y, yt);
+}
+
+template <class G, class J>
+auto sourceOffsetsD(const G& x, const J& ks, const PagerankData *D) {
+  return D && !D->sourceOffsets.empty()? D->sourceOffsets : sourceOffsets(x, ks);
+}
+
+template <class G, class J>
+auto destinationIndicesD(const G& x, const J& ks, const PagerankData *D) {
+  return D && !D->destinationIndices.empty()? D->destinationIndices : destinationIndices(x, ks);
+}
+
+template <class G, class J>
+auto vertexDataD(const G& x, const J& ks, const PagerankData *D) {
+  return D && !D->destinationIndices.empty()? D->vertexData : vertexData(x, ks);
+}

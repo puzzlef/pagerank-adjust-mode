@@ -164,5 +164,5 @@ bool verticesEqual(const G& x, int u, const G& y, int v) {
 
 template <class G, class H>
 bool verticesEqual(const G& x, const H& xt, int u, const G& y, const H& yt, int v) {
-  return verticesEqual(x, u, y, u) && verticesEqual(xt, u, yt, u);
+  return verticesEqual(x, u, y, v) && verticesEqual(xt, u, yt, v);
 }
