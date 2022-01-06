@@ -30,7 +30,7 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
     // Skip some edges (to speed up execution)
     if (skip>0 && !readSnapTemporal(x, s, skip)) break;
     auto xt = transposeWithDegree(x);
-    auto ksOld = vertices(x);
+    auto Kx = vertices(x);
     auto a0 = pagerankMonolithicSeq(x, xt, init, {repeat});
     auto Rx = a0.ranks;
 
@@ -38,14 +38,14 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
     auto y = copy(x);
     if (!readSnapTemporal(y, s, batch)) break;
     auto yt = transposeWithDegree(y);
-    auto ks = vertices(y);
+    auto Ky = vertices(y);
     vector<T> ry(y.span());
-    int X = ksOld.size();
-    int Y = ks.size();
+    int X = Kx.size();
+    int Y = Ky.size();
 
     // INSERTIONS:
     // Adjust ranks for insertions.
-    adjustRanks(ry, Rx, ksOld, ks, 0.0f, float(X)/(Y+1), 1.0f/(Y+1));
+    adjustRanks(ry, Rx, Kx, Ky, 0.0f, float(X)/(Y+1), 1.0f/(Y+1));
 
     // Find pagerank using L1-norm for convergence check.
     auto b0 = pagerankMonolithicSeq(y, yt, init, {repeat, L1});
@@ -75,7 +75,7 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
     // Adjust ranks for deletions.
     auto Ry = b0.ranks;
     vector<T> rx(x.span());
-    adjustRanks(rx, Ry, ks, ksOld, 0.0f, float(Y)/(X+1), 1.0f/(X+1));
+    adjustRanks(rx, Ry, Kx, Ky, 0.0f, float(Y)/(X+1), 1.0f/(X+1));
 
     // Find pagerank using L1-norm for convergence check.
     auto b1 = pagerankMonolithicSeq(x, xt, init, {repeat, L1});
