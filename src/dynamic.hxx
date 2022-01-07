@@ -20,13 +20,10 @@ using std::make_pair;
 // For calculating inital ranks for incremental/dynamic pagerank.
 
 template <class T, class J>
-void adjustRanks(vector<T>& a, const vector<T>& r, const J& ks0, const J& ks1, T radd, T rmul, T rset) {
-  unordered_set<int> kt0(ks0.begin(), ks0.end());
-  unordered_set<int> kt1(ks1.begin(), ks1.end());
-  for (int k : ks0)
-    if (kt1.count(k)>0)  a[k] = (r[k]+radd)*rmul;  // if vertex not removed
-  for (int k : ks1)
-    if (kt0.count(k)==0) a[k] = rset;              // if vertex added
+void adjustRanks(vector<T>& a, const vector<T>& r, const J& Kx, const J& Ky, T radd, T rmul, T rset) {
+  unordered_set<int> Sx(Kx.begin(), Kx.end());
+  for (int u : Ky)
+    a[u] = Sx.count(u)==0? rset : (r[u]+radd)*rmul;  // vertex new/old
 }
 
 template <class T, class J>
