@@ -31,7 +31,7 @@ void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
     if (skip>0 && !readSnapTemporal(x, s, skip)) break;
     auto xt = transposeWithDegree(x);
     auto Kx = vertices(x);
-    auto a0 = pagerankMonolithicSeq(x, xt, init, {repeat});
+    auto a0 = pagerankMonolithicSeq(x, xt, init);
     auto Rx = a0.ranks;
 
     // Read edges for this batch.
