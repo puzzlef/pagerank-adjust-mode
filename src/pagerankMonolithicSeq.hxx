@@ -17,7 +17,7 @@ using std::swap;
 // -------------
 
 template <class T>
-int pagerankMonolithicSeqLoop(vector<T>& a, vector<T>& r, vector<T>& c, const vector<T>& f, const vector<int>& vfrom, const vector<int>& efrom, const vector<int>& vdata, int i, int n, int N, T p, T E, int L, int EF) {
+float pagerankMonolithicSeqLoop(vector<T>& a, vector<T>& r, vector<T>& c, const vector<T>& f, const vector<int>& vfrom, const vector<int>& efrom, const vector<int>& vdata, int i, int n, int N, T p, T E, int L, int EF) {
   int l = 0;
   while (l<L) {
     T c0 = pagerankTeleport(r, vdata, N, p);
@@ -27,7 +27,7 @@ int pagerankMonolithicSeqLoop(vector<T>& a, vector<T>& r, vector<T>& c, const ve
     multiply(c, a, f, i, n);                          // update partial contributions (c)
     swap(a, r);                                       // final ranks always in (a)
   }
-  return l;
+  return float(l)*n/N;
 }
 
 

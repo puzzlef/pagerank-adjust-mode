@@ -15,7 +15,7 @@ using namespace std;
 template <class G, class T>
 void printRow(const G& x, const PagerankResult<T>& a, const PagerankResult<T>& b, const char *tec) {
   auto e = l1Norm(b.ranks, a.ranks);
-  print(x); printf(" [%09.3f ms; %03d iters.] [%.4e err.] %s\n", b.time, b.iterations, e, tec);
+  print(x); printf(" [%09.3f ms; %05.1f iters.; %.2e skip] [%.4e err.] %s\n", b.time, b.iterations, b.skip, e, tec);
 }
 
 void runPagerankBatch(const string& data, int repeat, int skip, int batch) {
