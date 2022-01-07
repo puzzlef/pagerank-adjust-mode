@@ -39,18 +39,25 @@ auto adjustRanks(int N, const vector<T>& r, const J& ks0, const J& ks1, T radd, 
 // ----------------
 // Find vertices with edges added/removed.
 
+template <class G>
+bool isChangedVertex(const G& x, const G& y, int u) {
+  return !x.hasVertex(u) || !verticesEqual(x, u, y, u);
+}
+template <class G, class H>
+bool isChangedVertex(const G& x, const H& xt, const G& y, const H& yt, int u) {
+  return !x.hasVertex(u) || !verticesEqual(x, xt, u, y, yt, u);  // both ways
+}
+
 template <class G, class F>
 void changedVerticesDo(const G& x, const G& y, F fn) {
   for (int u : y.vertices())
-    if (!x.hasVertex(u) || !verticesEqual(x, u, y, u)) fn(u);
+    if (isChangedVertex(x, y, u)) fn(u);
 }
-
 template <class G, class H, class F>
 void changedVerticesDo(const G& x, const H& xt, const G& y, const H& yt, F fn) {
   for (int u : y.vertices())
-    if (!x.hasVertex(u) || !verticesEqual(x, xt, u, y, yt, u)) fn(u);  // both ways
+    if (isChangedVertex(x, xt, y, yt, u)) fn(u);
 }
-
 
 template <class G>
 auto changedVertices(const G& x, const G& y) {
@@ -78,6 +85,27 @@ bool hasAffectedDeadEnd(const G& x, const G& y, const vector<bool>& vis) {
     if (isDeadEnd(y, u) && vis[u]) return true;
   return false;
 }
+
+
+template <class G, class H>
+bool affectedVerticesMark(vector<bool>& vis, const G& x, const H& xt, const G& y, const H& yt) {
+  changedVerticesDo(x, xt, y, yt, [&](int u) { dfsMarkLoop(vis, y, u); });
+  return hasAffectedDeadEnd(x, y, vis);
+}
+
+template <class G, class H>
+bool affectedInVerticesMark(vector<bool>& vis, const G& x, const H& xt, const G& y, const H& yt) {
+  changedVerticesDo(xt, yt, [&](int u) { dfsMarkLoop(vis, y, u); });
+  return hasAffectedDeadEnd(x, y, vis);
+}
+
+template <class G>
+bool affectedOutVerticesMark(vector<bool>& vis, const G& x, const G& y) {
+  changedVerticesDo(x, y, [&](int u) { dfsMarkLoop(vis, y, u); });
+  return hasAffectedDeadEnd(x, y, vis);
+}
+
+
 template <class G, class F>
 void affectedVerticesDoInt(const G& x, const G& y, const vector<bool>& vis, F fn) {
   if (hasAffectedDeadEnd(x, y, vis)) forEach(y.vertices(), fn);
@@ -129,6 +157,17 @@ auto affectedOutVertices(const G& x, const G& y) {
 // ----------------
 // Find affected, unaffected vertices (vertices, no. affected).
 
+
+template <class G, class FA>
+auto dynamicVerticesByMark(const G& y, FA fa) {
+  auto vis = createContainer(y, bool());
+  if(fa(vis)) return make_pair(vertices(y), y.order());
+  vector<int> a; int n = 0;
+  for (int u : y.vertices())
+    if (vis[u]) { a.push_back(u); ++n; }
+  return make_pair(a, n);
+}
+
 template <class G, class FA>
 auto dynamicVerticesBy(const G& y, FA fa) {
   vector<int> a; unordered_set<int> aff;
@@ -138,17 +177,18 @@ auto dynamicVerticesBy(const G& y, FA fa) {
   return make_pair(a, aff.size());
 }
 
+
 template <class G, class H>
 auto dynamicVertices(const G& x, const H& xt, const G& y, const H& yt) {
-  return dynamicVerticesBy(y, [&](auto fn) { affectedVerticesDo(x, xt, y, yt, fn); });
+  return dynamicVerticesByMark(y, [&](auto& vis) { return affectedVerticesMark(vis, x, xt, y, yt); });
 }
 template <class G, class H>
 auto dynamicInVertices(const G& x, const H& xt, const G& y, const H& yt) {
-  return dynamicVerticesBy(y, [&](auto fn) { affectedInVerticesDo(x, xt, y, yt, fn); });
+  return dynamicVerticesByMark(y, [&](auto& vis) { return affectedInVerticesMark(vis, x, xt, y, yt); });
 }
 template <class G>
 auto dynamicOutVertices(const G& x, const G& y) {
-  return dynamicVerticesBy(y, [&](auto fn) { affectedOutVerticesDo(x, y, fn); });
+  return dynamicVerticesByMark(y, [&](auto& vis) { return affectedOutVerticesMark(vis, x, y); });
 }
 
 
